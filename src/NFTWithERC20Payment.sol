@@ -9,39 +9,38 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 error NFTWithERC20Payment__PaymentFailed(string message);
 
 contract NFTWithERC20Payment is ERC721, Ownable {
-    IERC20 public paymentToken;
+    IERC20 immutable i_paymentToken;
     uint256 public constant PRICE = 10;
-    uint256 public totalSupply = 0;
+    uint256 public s_totalSupply = 0;
 
     event NFTMinted(address indexed owner, uint256 indexed tokenId);
 
     constructor(
         address initialOwner,
         address _paymentToken
-    ) payable ERC721("MyToken", "MTK") Ownable(initialOwner) {
-        paymentToken = IERC20(_paymentToken);
+    ) payable ERC721("MyNFT", "MNF") Ownable(initialOwner) {
+        i_paymentToken = IERC20(_paymentToken);
     }
 
-    function mint() public onlyOwner {
-        bool success = paymentToken.transferFrom(
+    function mint() public {
+       i_paymentToken.transferFrom(
             msg.sender,
             address(this),
             PRICE
         );
-        if (!success) {
-            revert NFTWithERC20Payment__PaymentFailed("Payment failed");
-        }
-        uint256 newItemId = totalSupply + 1;
+
+        uint256 newItemId = s_totalSupply + 1;
         _safeMint(msg.sender, newItemId);
-        totalSupply++;
+        unchecked {
+            s_totalSupply++;
+        }
         emit NFTMinted(msg.sender, newItemId);
     }
 
     function withdrawPayment() external onlyOwner {
-        paymentToken.transfer(owner(), paymentToken.balanceOf(address(this)));
-    }
-
-    receive() external payable {
-        revert("This contract does not accept Ether");
+        i_paymentToken.transfer(
+            owner(),
+            i_paymentToken.balanceOf(address(this))
+        );
     }
 }
