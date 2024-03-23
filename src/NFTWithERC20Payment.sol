@@ -6,8 +6,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-error NFTWithERC20Payment__PaymentFailed(string message);
-
 contract NFTWithERC20Payment is ERC721, Ownable {
     IERC20 immutable i_paymentToken;
     uint256 public constant PRICE = 10;
